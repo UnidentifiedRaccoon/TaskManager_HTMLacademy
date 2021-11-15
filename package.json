@@ -1,14 +1,18 @@
 {
-  "name": "TaskManager",
+  "name": "taskmanager",
   "version": "1.0.0",
   "private": true,
   "description": "Учебный проект «Менеджер задач» от HTML Academy",
   "scripts": {
     "eslint": "eslint src/**/*.js",
-    "test": "npm run eslint"
+    "test": "npm run eslint",
+    "build": "webpack",
+    "start": "webpack-dev-server"
   },
   "devDependencies": {
-    "eslint": "6.1.0",
-    "eslint-config-htmlacademy": "0.5.2"
+    "eslint-config-airbnb": "18.2.1",
+    "webpack": "5.64.0",
+    "webpack-cli": "4.9.1",
+    "webpack-dev-server": "4.5.0"
   }
 }

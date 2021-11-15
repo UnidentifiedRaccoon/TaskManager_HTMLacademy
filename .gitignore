@@ -10,6 +10,8 @@
 .cache/
 coverage/
 build/
+public/bundle.js
+public/bundle.js.map
 #!dist/index.html
 node_modules/
 *.log
