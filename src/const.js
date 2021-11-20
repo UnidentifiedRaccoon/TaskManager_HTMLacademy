@@ -1,3 +1,12 @@
+export const FILTER_TITLES = [
+  'All',
+  'Overdue',
+  'Today',
+  'Favorites',
+  'Repeating',
+  'Archive',
+];
+
 export const COLORS = [
   'black',
   'yellow',

@@ -9,7 +9,7 @@ import TaskTemplate from './components/TaskTemplate';
 import LoadModeButtonTemplate from './components/LoadModeButtonTemplate';
 
 const TASK_COUNT = 22;
-const SHOWING_TASKS_COUNT_ON_START = 3;
+const SHOWING_TASKS_COUNT_ON_START = 4;
 const SHOWING_TASKS_COUNT_ON_BUTTON_CLICK = 4;
 
 const render = (container, template, place = 'beforeend') => {
@@ -17,8 +17,8 @@ const render = (container, template, place = 'beforeend') => {
 };
 
 // Моковые данные
-const filtersData = generateSiteFiltersData();
 const tasksData = generateTasksData(TASK_COUNT);
+const filtersData = generateSiteFiltersData(tasksData);
 
 const siteMainElement = document.querySelector('.main');
 const siteHeaderElement = siteMainElement.querySelector('.main__control');
@@ -49,7 +49,6 @@ loadMoreButtonElement.addEventListener('click', (event) => {
   if (showingTaskCount >= tasksData.length) {
     showingTaskCount = tasksData.length;
     loadMoreButtonElement.remove();
-    console.log('loadMoreButtonElement was removed');
   }
   for (let i = prevTaskCount; i < showingTaskCount; i += 1) {
     render(taskListElement, TaskTemplate(tasksData[i]));
