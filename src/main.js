@@ -1,29 +1,56 @@
+import generateSiteFiltersData from './mock/generateSiteFiltersData';
+
+import { generateTasksData } from './mock/generateTasksData';
 import SiteMenuTemplate from './components/SiteMenuTemplate';
 import SiteFilterTemplate from './components/SiteFilterTemplate';
 import BoardTemplate from './components/BoardTemplate';
-import EditTemplate from './components/EditTemplate';
+import TaskEditTemplate from './components/TaskEditTemplate';
 import TaskTemplate from './components/TaskTemplate';
 import LoadModeButtonTemplate from './components/LoadModeButtonTemplate';
+
+const TASK_COUNT = 22;
+const SHOWING_TASKS_COUNT_ON_START = 4;
+const SHOWING_TASKS_COUNT_ON_BUTTON_CLICK = 4;
 
 const render = (container, template, place = 'beforeend') => {
   container.insertAdjacentHTML(place, template);
 };
 
+// Моковые данные
+const tasksData = generateTasksData(TASK_COUNT);
+const filtersData = generateSiteFiltersData(tasksData);
+
 const siteMainElement = document.querySelector('.main');
 const siteHeaderElement = siteMainElement.querySelector('.main__control');
 
 render(siteHeaderElement, SiteMenuTemplate());
-render(siteMainElement, SiteFilterTemplate());
+render(siteMainElement, SiteFilterTemplate(filtersData));
 render(siteMainElement, BoardTemplate());
 
 const taskListElement = siteMainElement.querySelector('.board__tasks');
 const boardElement = siteMainElement.querySelector('.board');
 
-render(taskListElement, EditTemplate());
+render(taskListElement, TaskEditTemplate(tasksData[0]));
 
-const TASK_COUNT = 3;
-for (let i = 0; i < TASK_COUNT; i += 1) {
-  render(taskListElement, TaskTemplate());
+// Отобразить первые N карточек
+let showingTaskCount = SHOWING_TASKS_COUNT_ON_START;
+for (let i = 1; i < showingTaskCount; i += 1) {
+  render(taskListElement, TaskTemplate(tasksData[i]));
 }
 
 render(boardElement, LoadModeButtonTemplate());
+
+// Отобразить еще N карточек по нажатию на кнопку
+const loadMoreButtonElement = boardElement.querySelector('.load-more');
+loadMoreButtonElement.addEventListener('click', (event) => {
+  event.preventDefault();
+  const prevTaskCount = showingTaskCount;
+  showingTaskCount += SHOWING_TASKS_COUNT_ON_BUTTON_CLICK;
+  if (showingTaskCount >= tasksData.length) {
+    showingTaskCount = tasksData.length;
+    loadMoreButtonElement.remove();
+  }
+  for (let i = prevTaskCount; i < showingTaskCount; i += 1) {
+    render(taskListElement, TaskTemplate(tasksData[i]));
+  }
+});

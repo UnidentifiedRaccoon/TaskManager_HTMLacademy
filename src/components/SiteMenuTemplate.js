@@ -1,4 +1,4 @@
-const SiteMenuTemplate = () => ` <section class="control__btn-wrap">
+const SiteMenuTemplate = () => `<section class="control__btn-wrap">
           <input 
           type="radio"
            name="control"
