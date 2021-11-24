@@ -36,4 +36,5 @@ const generateSiteFiltersData = (tasksData) => {
   }));
 };
 
-export default generateSiteFiltersData;
+// eslint-disable-next-line import/prefer-default-export
+export { generateSiteFiltersData };
