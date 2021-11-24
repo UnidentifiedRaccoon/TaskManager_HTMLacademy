@@ -1,4 +1,6 @@
-const SiteMenuTemplate = () => `<section class="control__btn-wrap">
+import { createElement } from '../utils';
+
+const createSiteMenuTemplate = () => `<section class="control__btn-wrap">
           <input 
           type="radio"
            name="control"
@@ -26,4 +28,25 @@ const SiteMenuTemplate = () => `<section class="control__btn-wrap">
             >STATISTICS</label
           >
         </section>`;
-export default SiteMenuTemplate;
+
+export default class SiteMenu {
+  constructor() {
+    this._element = null;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getTemplate() {
+    return createSiteMenuTemplate();
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element.remove();
+  }
+}

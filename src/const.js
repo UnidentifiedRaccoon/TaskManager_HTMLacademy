@@ -1,3 +1,8 @@
+export const RenderMethods = {
+  PREPEND: 'prepend',
+  APPEND: 'append',
+};
+
 export const FILTER_TITLES = [
   'All',
   'Overdue',

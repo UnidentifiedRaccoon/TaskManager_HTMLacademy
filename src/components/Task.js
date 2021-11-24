@@ -1,7 +1,7 @@
 import { MONTH_NAMES } from '../const';
-import { formatTime } from '../utils';
+import { createElement, formatTime } from '../utils';
 
-const TaskTemplate = (task) => {
+const createTaskTemplate = (task) => {
   const {
     description, dueDate, color, repeatingDays, isArchive, isFavorite,
   } = task;
@@ -60,4 +60,27 @@ const TaskTemplate = (task) => {
       </div>
     </article>`;
 };
-export default TaskTemplate;
+
+export default class Task {
+  constructor(task) {
+    this.task = task;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createTaskTemplate(this.task);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    // Изначально исп. this_.element = null
+    // Считаю явное удаление лучше
+    this._element.remove();
+  }
+}

@@ -2,8 +2,17 @@ parserOptions:
   ecmaVersion: 2018
   sourceType: "module"
 
+rules:
+  no-underscore-dangle: 0
+#  no-use-before-define: ["error", { "functions": true, "classes": true, "variables": false }]
+
+
 env:
   es6: true
   browser: true
 
-extends: "airbnb"
+extends: [
+    "eslint:recommended",
+    "airbnb"
+]
+

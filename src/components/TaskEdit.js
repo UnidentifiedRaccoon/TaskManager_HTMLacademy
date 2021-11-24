@@ -1,5 +1,5 @@
 import { COLORS, DAYS, MONTH_NAMES } from '../const';
-import { formatTime } from '../utils';
+import { createElement, formatTime } from '../utils';
 
 const createColorsMarkup = (colors, currentColor) => colors.map((color, index) => `
       <input
@@ -33,7 +33,7 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => DAYS.map((day, index)
       >`;
 }).join('\n');
 
-const TaskEditTemplate = (task) => {
+const createTaskEditTemplate = (task) => {
   const {
     description, dueDate, color, repeatingDays,
   } = task;
@@ -118,4 +118,24 @@ const TaskEditTemplate = (task) => {
           </article>
       `;
 };
-export default TaskEditTemplate;
+export default class TaskEdit {
+  constructor(task) {
+    this.task = task;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createTaskEditTemplate(this.task);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+    return this._element;
+  }
+
+  removeElement() {
+    this._element.remove();
+  }
+}
