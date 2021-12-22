@@ -63,8 +63,8 @@ const renderBoard = (siteMainElement, tasksData) => {
     return;
   }
 
-  render(boardElement, (new Sorting()).getElement());
-  render(boardElement, (new Tasks()).getElement());
+  render(boardElement, new Sorting().getElement());
+  render(boardElement, new Tasks().getElement());
   const taskListElement = boardElement.querySelector('.board__tasks');
   // Отобразить первые N карточек
   let showingTaskCount = SHOWING_TASKS_COUNT_ON_START;
@@ -90,14 +90,13 @@ const renderBoard = (siteMainElement, tasksData) => {
     }
   });
 };
-
 const tasksData = generateTasksData(TASK_COUNT);
 const filtersData = generateSiteFiltersData(tasksData);
 
 const siteMainElement = document.querySelector('.main');
-const siteHeaderElement = siteMainElement.querySelector('.main__control');
+// const siteHeaderElement = siteMainElement.querySelector('.main__control');
 
-render(siteHeaderElement, (new SiteMenu()).getElement());
+// render(siteHeaderElement, new SiteMenu().getElement());
 render(siteMainElement, new SiteFilter(filtersData).getElement());
 
 renderBoard(siteMainElement, tasksData);
