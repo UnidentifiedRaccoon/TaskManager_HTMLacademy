@@ -1,5 +1,5 @@
 import { MONTH_NAMES } from '../const';
-import { formatTime } from '../utils';
+import { formatTime } from '../utils/common';
 import IComponent from './AbstractClasses/IComponent';
 
 const createTaskTemplate = (task) => {
@@ -70,5 +70,11 @@ export default class Task extends IComponent {
 
   getTemplate() {
     return createTaskTemplate(this.task);
+  }
+
+  setEditBtnClickHandler(handler) {
+    this.getElement()
+      .querySelector('.card__btn--edit')
+      .addEventListener('click', handler);
   }
 }

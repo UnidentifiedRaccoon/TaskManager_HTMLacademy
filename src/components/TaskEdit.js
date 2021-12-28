@@ -1,5 +1,5 @@
 import { COLORS, DAYS, MONTH_NAMES } from '../const';
-import { createElement, formatTime } from '../utils';
+import { formatTime } from '../utils/common';
 import IComponent from './AbstractClasses/IComponent';
 
 const createColorsMarkup = (colors, currentColor) => colors.map((color, index) => `
@@ -127,5 +127,11 @@ export default class TaskEdit extends IComponent {
 
   getTemplate() {
     return createTaskEditTemplate(this.task);
+  }
+
+  setSubmitHandler(handler) {
+    this.getElement()
+      .querySelector('form')
+      .addEventListener('submit', handler);
   }
 }

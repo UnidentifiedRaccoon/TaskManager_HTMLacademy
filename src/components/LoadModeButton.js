@@ -7,4 +7,8 @@ export default class LoadModeButton extends IComponent {
   getTemplate() {
     return createLoadModeButtonTemplate();
   }
+
+  setClickHandler(handler) {
+    this.getElement().addEventListener('click', handler);
+  }
 }

@@ -10,7 +10,7 @@ import LoadModeButton from './components/LoadModeButton';
 
 import { generateSiteFiltersData } from './mock/generateSiteFiltersData';
 import { generateTasksData } from './mock/generateTasksData';
-import { render } from './utils';
+import { remove, render, replace } from './utils/render';
 
 // Моковые данные
 const TASK_COUNT = 10;
@@ -19,53 +19,50 @@ const SHOWING_TASKS_COUNT_ON_START = 4;
 const SHOWING_TASKS_COUNT_ON_BUTTON_CLICK = 4;
 
 const renderTask = (taskListElement, taskData) => {
-  const taskElement = new Task(taskData).getElement();
-  const taskEditElement = new TaskEdit(taskData).getElement();
+  const taskComponent = new Task(taskData);
+  const taskEditComponent = new TaskEdit(taskData);
 
   const escKeyDownHandler = (event) => {
     event.preventDefault();
     const isEsc = event.keyCode === 27;
     if (isEsc) {
-      taskEditElement.replaceWith(taskElement);
+      replace(taskEditComponent, taskComponent);
       document.removeEventListener('keydown', escKeyDownHandler);
     }
   };
 
   const editBtnClickHandler = (event) => {
     event.preventDefault();
-    taskElement.replaceWith(taskEditElement);
+    replace(taskComponent, taskEditComponent);
     document.addEventListener('keydown', escKeyDownHandler);
   };
 
   const submitEditedTaskHandler = (event) => {
     event.preventDefault();
-    taskEditElement.replaceWith(taskElement);
+    replace(taskEditComponent, taskComponent);
     document.removeEventListener('keydown', escKeyDownHandler);
   };
 
-  const editBtn = taskElement.querySelector('.card__btn--edit');
-  editBtn.addEventListener('click', editBtnClickHandler);
+  taskComponent.setEditBtnClickHandler(editBtnClickHandler);
+  taskEditComponent.setSubmitHandler(submitEditedTaskHandler);
 
-  const editForm = taskEditElement.querySelector('form');
-  editForm.addEventListener('submit', submitEditedTaskHandler);
-
-  render(taskListElement, taskElement);
+  render(taskListElement, taskComponent);
 };
 
 const renderBoard = (siteMainElement, tasksData) => {
-  const boardElement = new Board().getElement();
-  render(siteMainElement, boardElement);
+  const boardComponent = new Board();
+  render(siteMainElement, boardComponent);
 
   const isAllTasksArchived = tasksData.every((task) => task.isArchive);
   if (tasksData.length === 0 || isAllTasksArchived) {
     console.log(true);
-    render(boardElement, new NoTasks().getElement());
+    render(boardComponent.getElement(), new NoTasks());
     return;
   }
 
-  render(boardElement, new Sorting().getElement());
-  render(boardElement, new Tasks().getElement());
-  const taskListElement = boardElement.querySelector('.board__tasks');
+  render(boardComponent.getElement(), new Sorting());
+  render(boardComponent.getElement(), new Tasks());
+  const taskListElement = boardComponent.getElement().querySelector('.board__tasks');
   // Отобразить первые N карточек
   let showingTaskCount = SHOWING_TASKS_COUNT_ON_START;
 
@@ -73,30 +70,33 @@ const renderBoard = (siteMainElement, tasksData) => {
     renderTask(taskListElement, tasksData[i]);
   }
 
-  const loadMoreButtonElement = new LoadModeButton().getElement();
-  render(boardElement, loadMoreButtonElement);
+  // Отобразить кнопку загрузки новых карточек
+  const loadMoreButtonComponent = new LoadModeButton();
+  render(boardComponent.getElement(), loadMoreButtonComponent);
 
   // Отобразить еще N карточек по нажатию на кнопку
-  loadMoreButtonElement.addEventListener('click', (event) => {
+  const loadMoreHandler = (event) => {
     event.preventDefault();
     const prevTaskCount = showingTaskCount;
     showingTaskCount += SHOWING_TASKS_COUNT_ON_BUTTON_CLICK;
     if (showingTaskCount >= tasksData.length) {
       showingTaskCount = tasksData.length;
-      loadMoreButtonElement.remove();
+      remove(loadMoreButtonComponent);
     }
     for (let i = prevTaskCount; i < showingTaskCount; i += 1) {
       renderTask(taskListElement, tasksData[i]);
     }
-  });
+  };
+  loadMoreButtonComponent.setClickHandler(loadMoreHandler);
 };
+
 const tasksData = generateTasksData(TASK_COUNT);
 const filtersData = generateSiteFiltersData(tasksData);
 
 const siteMainElement = document.querySelector('.main');
-// const siteHeaderElement = siteMainElement.querySelector('.main__control');
+const siteHeaderElement = siteMainElement.querySelector('.main__control');
 
-// render(siteHeaderElement, new SiteMenu().getElement());
-render(siteMainElement, new SiteFilter(filtersData).getElement());
+render(siteHeaderElement, new SiteMenu());
+render(siteMainElement, new SiteFilter(filtersData));
 
 renderBoard(siteMainElement, tasksData);
