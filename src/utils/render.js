@@ -8,11 +8,6 @@ export const createElement = (template) => {
 };
 
 export const render = (container, component, method = RenderMethods.APPEND) => {
-  // console.log('Контейнер');
-  // console.log(container);
-  // console.log('Содержимое - элемент');
-  // console.log(component);
-
   switch (method) {
     case RenderMethods.PREPEND:
       container.prepend(component.getElement());
@@ -21,16 +16,13 @@ export const render = (container, component, method = RenderMethods.APPEND) => {
       container.append(component.getElement());
       break;
     default:
-      // console.log('Ошибка вставки метода render');
   }
 };
 
 export const replace = (oldComponent, newComponent) => {
-  // if (newComponent && oldComponent) {
-  oldComponent.getElement().replaceWith(newComponent.getElement());
-  // }
-  console.log(newComponent.getElement());
-  console.log(oldComponent.getElement());
+  if (newComponent && oldComponent) {
+    oldComponent.getElement().replaceWith(newComponent.getElement());
+  }
 };
 
 export const remove = (component) => {

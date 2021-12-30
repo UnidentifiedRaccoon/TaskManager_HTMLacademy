@@ -3,6 +3,12 @@ export const RenderMethods = {
   APPEND: 'append',
 };
 
+export const SortTypes = {
+  DEFAULT: 'default',
+  DATE_DOWN: 'date-down',
+  DATE_UP: 'date-up',
+};
+
 export const FILTER_TITLES = [
   'All',
   'Overdue',
