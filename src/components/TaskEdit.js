@@ -1,5 +1,6 @@
 import { COLORS, DAYS, MONTH_NAMES } from '../const';
-import { createElement, formatTime } from '../utils';
+import { formatTime } from '../utils/common';
+import IComponent from './AbstractClasses/IComponent';
 
 const createColorsMarkup = (colors, currentColor) => colors.map((color, index) => `
       <input
@@ -118,24 +119,19 @@ const createTaskEditTemplate = (task) => {
           </article>
       `;
 };
-export default class TaskEdit {
+export default class TaskEdit extends IComponent {
   constructor(task) {
+    super();
     this.task = task;
-    this._element = null;
   }
 
   getTemplate() {
     return createTaskEditTemplate(this.task);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
+  setSubmitHandler(handler) {
+    this.getElement()
+      .querySelector('form')
+      .addEventListener('submit', handler);
   }
 }

@@ -1,5 +1,6 @@
 import { MONTH_NAMES } from '../const';
-import { createElement, formatTime } from '../utils';
+import { formatTime } from '../utils/common';
+import IComponent from './AbstractClasses/IComponent';
 
 const createTaskTemplate = (task) => {
   const {
@@ -61,26 +62,19 @@ const createTaskTemplate = (task) => {
     </article>`;
 };
 
-export default class Task {
+export default class Task extends IComponent {
   constructor(task) {
+    super();
     this.task = task;
-    this._element = null;
   }
 
   getTemplate() {
     return createTaskTemplate(this.task);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    // Изначально исп. this_.element = null
-    // Считаю явное удаление лучше
-    this._element.remove();
+  setEditBtnClickHandler(handler) {
+    this.getElement()
+      .querySelector('.card__btn--edit')
+      .addEventListener('click', handler);
   }
 }

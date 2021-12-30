@@ -1,4 +1,4 @@
-import { createElement } from '../utils';
+import IComponent from './AbstractClasses/IComponent';
 
 const createFilterMarkup = (filter, isChecked) => {
   const { title, count } = filter;
@@ -22,24 +22,13 @@ const createSiteFilterTemplate = (filters) => {
       </section>`;
 };
 
-export default class SiteFilter {
+export default class SiteFilter extends IComponent {
   constructor(filters) {
+    super();
     this.filters = filters;
-    this._element = null;
   }
 
   getTemplate() {
     return createSiteFilterTemplate(this.filters);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element.remove();
   }
 }
