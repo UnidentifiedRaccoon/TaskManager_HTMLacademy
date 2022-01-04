@@ -1,44 +1,23 @@
-import Task from '../components/Task';
-import TaskEdit from '../components/TaskEdit';
-import { remove, render, replace } from '../utils/render';
+import { remove, render } from '../utils/render';
 import NoTasks from '../components/NoTasks';
 import Sort from '../components/Sort';
 import Tasks from '../components/Tasks';
 import LoadModeButton from '../components/LoadModeButton';
 import { SortTypes } from '../const';
+import TaskController from './task';
 
 const SHOWING_TASKS_COUNT_ON_START = 4;
 const SHOWING_TASKS_COUNT_ON_BUTTON_CLICK = 4;
 
 const renderTask = (taskListElement, taskData) => {
-  const taskComponent = new Task(taskData);
-  const taskEditComponent = new TaskEdit(taskData);
+  const taskController = new TaskController(taskListElement);
+  taskController.render(taskData);
+};
 
-  const escKeyDownHandler = (event) => {
-    event.preventDefault();
-    const isEsc = event.keyCode === 27;
-    if (isEsc) {
-      replace(taskEditComponent, taskComponent);
-      document.removeEventListener('keydown', escKeyDownHandler);
-    }
-  };
-
-  const editBtnClickHandler = (event) => {
-    event.preventDefault();
-    replace(taskComponent, taskEditComponent);
-    document.addEventListener('keydown', escKeyDownHandler);
-  };
-
-  const submitEditedTaskHandler = (event) => {
-    event.preventDefault();
-    replace(taskEditComponent, taskComponent);
-    document.removeEventListener('keydown', escKeyDownHandler);
-  };
-
-  taskComponent.setEditBtnClickHandler(editBtnClickHandler);
-  taskEditComponent.setSubmitHandler(submitEditedTaskHandler);
-
-  render(taskListElement, taskComponent);
+const renderTasks = (taskListElement, tasksDataSlice) => {
+  tasksDataSlice.forEach((taskData) => {
+    renderTask(taskListElement, taskData);
+  });
 };
 
 const getSortTasksData = (tasksData, sortType) => {
@@ -76,12 +55,6 @@ export default class BoardController {
     const taskListElement = this._tasksComponent.getElement();
     let showingTaskCount = SHOWING_TASKS_COUNT_ON_START;
 
-    const renderTasks = (tasksDataSlice) => {
-      tasksDataSlice.forEach((task) => {
-        renderTask(taskListElement, task);
-      });
-    };
-
     const renderLoadMoreButton = () => {
       render(container, this._loadMoreButtonComponent);
 
@@ -94,7 +67,7 @@ export default class BoardController {
           showingTaskCount = sortedTasksData.length;
           remove(this._loadMoreButtonComponent);
         }
-        renderTasks(sortedTasksData.slice(prevTaskCount, showingTaskCount));
+        renderTasks(taskListElement, sortedTasksData.slice(prevTaskCount, showingTaskCount));
       };
       this._loadMoreButtonComponent.setClickHandler(loadMoreHandler);
     };
@@ -107,14 +80,14 @@ export default class BoardController {
 
     render(container, this._sortComponent);
     render(container, this._tasksComponent);
-    renderTasks(tasksData.slice(0, showingTaskCount));
+    renderTasks(taskListElement, tasksData.slice(0, showingTaskCount));
     renderLoadMoreButton();
 
     this._sortComponent.setSortTypeChangeHandler(() => {
       const sortedTasksData = getSortTasksData(tasksData, this._sortComponent.getSortType());
       showingTaskCount = SHOWING_TASKS_COUNT_ON_START;
       taskListElement.innerHTML = '';
-      renderTasks(sortedTasksData.slice(0, showingTaskCount));
+      renderTasks(taskListElement, sortedTasksData.slice(0, showingTaskCount));
       renderLoadMoreButton();
     });
   }
