@@ -75,6 +75,27 @@ export default class Task extends IComponent {
   setEditBtnClickHandler(handler) {
     this.getElement()
       .querySelector('.card__btn--edit')
-      .addEventListener('click', handler);
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler(event);
+      });
+  }
+
+  setArchiveBtnClickHandler(handler) {
+    this.getElement()
+      .querySelector('.card__btn--archive')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler(event);
+      });
+  }
+
+  setFavoritesBtnClickHandler(handler) {
+    this.getElement()
+      .querySelector('.card__btn--favorites')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler(event);
+      });
   }
 }

@@ -132,6 +132,9 @@ export default class TaskEdit extends IComponent {
   setSubmitHandler(handler) {
     this.getElement()
       .querySelector('form')
-      .addEventListener('submit', handler);
+      .addEventListener('submit', (event) => {
+        event.preventDefault();
+        handler();
+      });
   }
 }
