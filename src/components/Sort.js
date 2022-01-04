@@ -38,6 +38,6 @@ export default class Sort extends IComponent {
       this.setSortType(sortType);
       handler(sortType);
     };
-    this.getElement().addEventListener('click', clickOnSortBtnHandler);
+    this._element.addEventListener('click', clickOnSortBtnHandler);
   }
 }
