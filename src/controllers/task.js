@@ -18,7 +18,7 @@ export default class TaskController {
     this.task.setEditBtnClickHandler(this._onEditBtnClickHandler);
     this.taskEdit.setSubmitHandler(this._onSubmitHandler);
 
-    render(this.container, this.task);
+    render(this.container.getElement(), this.task);
   }
 
   _onSubmitHandler(event) {
