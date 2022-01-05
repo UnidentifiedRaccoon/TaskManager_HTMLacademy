@@ -1,14 +1,17 @@
 import Task from '../components/Task';
 import { render, replace } from '../utils/render';
 import TaskEdit from '../components/TaskEdit';
+import { Mode } from '../const';
 
 export default class TaskController {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, onViewChange) {
     this.container = container;
     this._onDataChange = onDataChange;
+    this._onViewChange = onViewChange;
     this.taskData = null;
     this.task = null;
     this.taskEdit = null;
+    this.mode = Mode.DEFAULT;
 
     this._onEditBtnClickHandler = this._onEditBtnClickHandler.bind(this);
     this._onArchiveBtnClickHandler = this._onArchiveBtnClickHandler.bind(this);
@@ -38,6 +41,10 @@ export default class TaskController {
     this.taskEdit.setSubmitHandler(this._onSubmitHandler);
   }
 
+  setDefaultView() {
+    if (this.mode !== Mode.DEFAULT) this._replaceEditToTask();
+  }
+
   _onSubmitHandler() {
     this._replaceEditToTask();
   }
@@ -62,11 +69,14 @@ export default class TaskController {
   }
 
   _replaceTaskToEdit() {
+    this._onViewChange();
+    this.mode = Mode.EDIT;
     replace(this.task, this.taskEdit);
     document.addEventListener('keydown', this._onEscKeyDownHandler);
   }
 
   _replaceEditToTask() {
+    this.mode = Mode.DEFAULT;
     replace(this.taskEdit, this.task);
     document.removeEventListener('keydown', this._onEscKeyDownHandler);
   }

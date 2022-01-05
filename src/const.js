@@ -9,6 +9,11 @@ export const SortTypes = {
   DATE_UP: 'date-up',
 };
 
+export const Mode = {
+  DEFAULT: 'default',
+  EDIT: 'edit',
+};
+
 export const FILTER_TITLES = [
   'All',
   'Overdue',
