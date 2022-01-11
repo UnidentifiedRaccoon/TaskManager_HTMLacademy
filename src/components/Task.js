@@ -1,5 +1,4 @@
-import { MONTH_NAMES } from '../const';
-import { formatTime } from '../utils/common';
+import { formatTime, formatDate } from '../utils/common';
 import IComponent from './AbstractClasses/IComponent';
 
 const createTaskTemplate = (task) => {
@@ -8,7 +7,7 @@ const createTaskTemplate = (task) => {
   } = task;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
   const isDateShowing = !!dueDate;
-  const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : '';
+  const date = isDateShowing ? formatDate(dueDate) : '';
   const time = isDateShowing ? formatTime(dueDate) : '';
 
   const isRepeatingTask = Object.values(repeatingDays).some(Boolean);
@@ -66,6 +65,8 @@ export default class Task extends IComponent {
   constructor(task) {
     super();
     this.task = task;
+    this.isArchive = task.isArchive;
+    this.isFavorite = task.isFavorite;
   }
 
   getTemplate() {
@@ -75,6 +76,27 @@ export default class Task extends IComponent {
   setEditBtnClickHandler(handler) {
     this.getElement()
       .querySelector('.card__btn--edit')
-      .addEventListener('click', handler);
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler(event);
+      });
+  }
+
+  setArchiveBtnClickHandler(handler) {
+    this.getElement()
+      .querySelector('.card__btn--archive')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler(event);
+      });
+  }
+
+  setFavoritesBtnClickHandler(handler) {
+    this.getElement()
+      .querySelector('.card__btn--favorites')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler(event);
+      });
   }
 }

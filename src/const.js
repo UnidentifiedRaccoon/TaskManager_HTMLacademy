@@ -9,6 +9,11 @@ export const SortTypes = {
   DATE_UP: 'date-up',
 };
 
+export const Mode = {
+  DEFAULT: 'default',
+  EDIT: 'edit',
+};
+
 export const FILTER_TITLES = [
   'All',
   'Overdue',
@@ -36,17 +41,17 @@ export const DAYS = [
   'su',
 ];
 
-export const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'Jule',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+// export const MONTH_NAMES = [
+//   'January',
+//   'February',
+//   'March',
+//   'April',
+//   'May',
+//   'June',
+//   'Jule',
+//   'August',
+//   'September',
+//   'October',
+//   'November',
+//   'December',
+// ];
