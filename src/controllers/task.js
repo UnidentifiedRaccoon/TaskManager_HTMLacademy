@@ -31,6 +31,8 @@ export default class TaskController {
     if (oldTask && oldTaskEdit) {
       replace(oldTask, this.task);
       replace(oldTaskEdit, this.taskEdit);
+      oldTask.removeElement();
+      oldTaskEdit.removeElement();
     } else {
       render(this.container.getElement(), this.task);
     }
@@ -77,6 +79,7 @@ export default class TaskController {
 
   _replaceEditToTask() {
     this.mode = Mode.DEFAULT;
+    this.taskEdit.reset();
     replace(this.taskEdit, this.task);
     document.removeEventListener('keydown', this._onEscKeyDownHandler);
   }

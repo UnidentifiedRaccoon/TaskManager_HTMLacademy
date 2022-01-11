@@ -1,6 +1,6 @@
 import { COLORS, DAYS, MONTH_NAMES } from '../const';
 import { formatTime } from '../utils/common';
-import IComponent from './AbstractClasses/IComponent';
+import ISmartComponent from './AbstractClasses/ISmartComponent';
 
 const createColorsMarkup = (colors, currentColor) => colors.map((color, index) => `
       <input
@@ -17,8 +17,7 @@ const createColorsMarkup = (colors, currentColor) => colors.map((color, index) =
         >${color}</label
       >
 `).join('\n');
-
-const createRepeatingDaysMarkup = (days, repeatingDays) => DAYS.map((day, index) => {
+const createRepeatingDaysMarkup = (days, repeatingDays, isRepeating) => days.map((day, index) => {
   const isCurrentDayChecked = repeatingDays[day];
   return `
       <input
@@ -27,32 +26,36 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => DAYS.map((day, index)
         id="repeat-${day}-${index}"
         name="repeat"
         value="${day}"
-        ${isCurrentDayChecked ? 'checked' : ''}
+        ${isRepeating && isCurrentDayChecked ? 'checked' : ''}
+        ${isRepeating ? '' : 'disabled'}
       />
       <label class="card__repeat-day" for="repeat-${day}-${index}"
         >${day}</label
       >`;
 }).join('\n');
 
-const createTaskEditTemplate = (task) => {
+const createTaskEditTemplate = (task, options = {}) => {
+  const { description, dueDate } = task;
+
   const {
-    description, dueDate, color, repeatingDays,
-  } = task;
+    isDateShowing, isRepeatingTask, activeRepeatingDays, currentColor,
+  } = options;
 
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
-  const isDateShowing = !!dueDate;
-  const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : '';
-  const time = isDateShowing ? formatTime(dueDate) : '';
+  // ToDo isDataShowing && !dueDate - добавить условие
+  const isSaveButtonBlocked = (isDateShowing && isRepeatingTask)
+      || (isRepeatingTask && !Object.values(activeRepeatingDays).some(Boolean));
+  const date = (isDateShowing && dueDate) ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : '';
+  const time = (isDateShowing && dueDate) ? formatTime(dueDate) : '';
 
-  const isRepeatingTask = Object.values(repeatingDays).some(Boolean);
   const repeatClass = isRepeatingTask ? 'card--repeat' : '';
   const deadlineClass = isExpired ? 'card--deadline' : '';
 
-  const colorsMarkup = createColorsMarkup(COLORS, color);
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, repeatingDays);
+  const colorsMarkup = createColorsMarkup(COLORS, currentColor);
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays, isRepeatingTask);
 
   return `
-          <article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
+          <article class="card card--edit card--${currentColor} ${repeatClass} ${deadlineClass}">
             <form class="card__form" method="get">
               <div class="card__inner">
                 <div class="card__color-bar">
@@ -111,7 +114,7 @@ const createTaskEditTemplate = (task) => {
                 </div>
 
                 <div class="card__status-btns">
-                  <button class="card__save" type="submit">save</button>
+                  <button class="card__save" type="submit" ${isSaveButtonBlocked ? 'disabled' : ''}>save</button>
                   <button class="card__delete" type="button">delete</button>
                 </div>
               </div>
@@ -119,14 +122,42 @@ const createTaskEditTemplate = (task) => {
           </article>
       `;
 };
-export default class TaskEdit extends IComponent {
+export default class TaskEdit extends ISmartComponent {
   constructor(task) {
     super();
     this.task = task;
+    this._isDateShowing = !!task.dueDate;
+    this._isRepeatingTask = Object.values(task.repeatingDays).some(Boolean);
+    this._activeRepeatingDays = { ...task.repeatingDays };
+    this._currentColor = task.color;
+
+    this._submitHandler = null;
+    this._setAllListeners();
   }
 
   getTemplate() {
-    return createTaskEditTemplate(this.task);
+    return createTaskEditTemplate(
+      this.task,
+      {
+        isDateShowing: this._isDateShowing,
+        isRepeatingTask: this._isRepeatingTask,
+        activeRepeatingDays: this._activeRepeatingDays,
+        currentColor: this._currentColor,
+      },
+    );
+  }
+
+  recoveryListeners() {
+    this.setSubmitHandler(this._submitHandler);
+    this._setAllListeners();
+  }
+
+  reset() {
+    this._isDateShowing = !!this.task.dueDate;
+    this._isRepeatingTask = Object.values(this.task.repeatingDays).some(Boolean);
+    this._activeRepeatingDays = { ...this.task.repeatingDays };
+    this._currentColor = this.task.color;
+    this.rerender();
   }
 
   setSubmitHandler(handler) {
@@ -135,6 +166,54 @@ export default class TaskEdit extends IComponent {
       .addEventListener('submit', (event) => {
         event.preventDefault();
         handler();
+      });
+    this._submitHandler = handler;
+  }
+
+  _setAllListeners() {
+    this._addDateToggleClickListener();
+    this._addRepeatToggleClickListener();
+    this._addRepeatingDaysChangeListener();
+    this._addColorsChangeListener();
+  }
+
+  _addDateToggleClickListener() {
+    this.getElement()
+      .querySelector('.card__date-deadline-toggle')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        this._isDateShowing = !this._isDateShowing;
+        this.rerender();
+      });
+  }
+
+  _addRepeatToggleClickListener() {
+    this.getElement()
+      .querySelector('.card__repeat-toggle')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        this._isRepeatingTask = !this._isRepeatingTask;
+        this.rerender();
+      });
+  }
+
+  _addRepeatingDaysChangeListener() {
+    this.getElement()
+      .querySelector('.card__repeat-days')
+      .addEventListener('change', (event) => {
+        event.preventDefault();
+        this._activeRepeatingDays[event.target.value] = event.target.checked;
+        this.rerender();
+      });
+  }
+
+  _addColorsChangeListener() {
+    this.getElement()
+      .querySelector('.card__colors-wrap')
+      .addEventListener('change', (event) => {
+        event.preventDefault();
+        this._currentColor = event.target.value;
+        this.rerender();
       });
   }
 }
