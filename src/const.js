@@ -41,17 +41,17 @@ export const DAYS = [
   'su',
 ];
 
-export const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'Jule',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+// export const MONTH_NAMES = [
+//   'January',
+//   'February',
+//   'March',
+//   'April',
+//   'May',
+//   'June',
+//   'Jule',
+//   'August',
+//   'September',
+//   'October',
+//   'November',
+//   'December',
+// ];

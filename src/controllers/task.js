@@ -13,9 +13,9 @@ export default class TaskController {
     this.taskEdit = null;
     this.mode = Mode.DEFAULT;
 
-    this._onEditBtnClickHandler = this._onEditBtnClickHandler.bind(this);
-    this._onArchiveBtnClickHandler = this._onArchiveBtnClickHandler.bind(this);
-    this._onFavoritesBtnClickHandler = this._onFavoritesBtnClickHandler.bind(this);
+    this.onEditBtnClickHandler = this._onEditBtnClickHandler.bind(this);
+    this.onArchiveBtnClickHandler = this._onArchiveBtnClickHandler.bind(this);
+    this.onFavoritesBtnClickHandler = this._onFavoritesBtnClickHandler.bind(this);
     this._onSubmitHandler = this._onSubmitHandler.bind(this);
 
     this._onEscKeyDownHandler = this._onEscKeyDownHandler.bind(this);
@@ -37,9 +37,9 @@ export default class TaskController {
       render(this.container.getElement(), this.task);
     }
 
-    this.task.setEditBtnClickHandler(this._onEditBtnClickHandler);
-    this.task.setArchiveBtnClickHandler(this._onArchiveBtnClickHandler);
-    this.task.setFavoritesBtnClickHandler(this._onFavoritesBtnClickHandler);
+    this.task.setEditBtnClickHandler(this.onEditBtnClickHandler);
+    this.task.setArchiveBtnClickHandler(this.onArchiveBtnClickHandler);
+    this.task.setFavoritesBtnClickHandler(this.onFavoritesBtnClickHandler);
     this.taskEdit.setSubmitHandler(this._onSubmitHandler);
   }
 

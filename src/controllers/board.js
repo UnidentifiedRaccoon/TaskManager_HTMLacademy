@@ -119,7 +119,6 @@ export default class BoardController {
   _onDataChange(oldData, newData) {
     const index = this.tasksData.findIndex((data) => data === oldData);
     if (index === -1) return;
-
     this.tasksData = [
       ...this.tasksData.slice(0, index),
       newData,

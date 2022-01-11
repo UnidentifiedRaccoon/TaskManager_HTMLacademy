@@ -1,5 +1,4 @@
-import { MONTH_NAMES } from '../const';
-import { formatTime } from '../utils/common';
+import { formatTime, formatDate } from '../utils/common';
 import IComponent from './AbstractClasses/IComponent';
 
 const createTaskTemplate = (task) => {
@@ -8,7 +7,7 @@ const createTaskTemplate = (task) => {
   } = task;
   const isExpired = dueDate instanceof Date && dueDate < Date.now();
   const isDateShowing = !!dueDate;
-  const date = isDateShowing ? `${dueDate.getDate()} ${MONTH_NAMES[dueDate.getMonth()]}` : '';
+  const date = isDateShowing ? formatDate(dueDate) : '';
   const time = isDateShowing ? formatTime(dueDate) : '';
 
   const isRepeatingTask = Object.values(repeatingDays).some(Boolean);
@@ -66,6 +65,8 @@ export default class Task extends IComponent {
   constructor(task) {
     super();
     this.task = task;
+    this.isArchive = task.isArchive;
+    this.isFavorite = task.isFavorite;
   }
 
   getTemplate() {
