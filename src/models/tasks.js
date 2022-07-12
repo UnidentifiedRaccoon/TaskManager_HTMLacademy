@@ -1,11 +1,21 @@
+import { FilterType } from '../const';
+import { getTasksByFilter } from '../utils/filter';
+
 export default class Tasks {
   constructor() {
     this._tasks = [];
+    this._activeFilterType = FilterType.All;
+
     this._dataChangeHandlers = [];
+    this._filterChangeHandlers = [];
+  }
+
+  getAllTasksData() {
+    return this._tasks;
   }
 
   getTasksData() {
-    return this._tasks;
+    return getTasksByFilter(this._tasks, this._activeFilterType);
   }
 
   setTasksData(data) {
@@ -29,5 +39,10 @@ export default class Tasks {
   // eslint-disable-next-line class-methods-use-this
   _callHandlers(handlers) {
     handlers.forEach((handler) => handler());
+  }
+
+  setFilter(filterType) {
+    this._activeFilterType = filterType;
+    this._callHandlers(this._filterChangeHandlers);
   }
 }
