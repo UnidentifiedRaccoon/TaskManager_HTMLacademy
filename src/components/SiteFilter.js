@@ -1,5 +1,9 @@
 import IComponent from './AbstractClasses/IComponent';
 
+const FILTER_ID_PREFIX = 'filter__';
+
+const getFilterNameById = (id) => id.substring(FILTER_ID_PREFIX.length);
+
 const createFilterMarkup = (filter, isChecked) => {
   const { title, count } = filter;
   return ` <input
@@ -16,7 +20,7 @@ const createFilterMarkup = (filter, isChecked) => {
 };
 
 const createSiteFilterTemplate = (filters) => {
-  const filtersMarkup = filters.map((item, i) => createFilterMarkup(item, i === 0));
+  const filtersMarkup = filters.map((item) => createFilterMarkup(item, item.checked));
   return ` <section class="main__filter filter container">
         ${filtersMarkup.join('\n')}
       </section>`;
@@ -33,6 +37,9 @@ export default class SiteFilter extends IComponent {
   }
 
   setFilterChangeHandler(handler) {
-
+    this.getElement().addEventListener('change', (evt) => {
+      const filterName = getFilterNameById(evt.target.id);
+      handler(filterName);
+    });
   }
 }
