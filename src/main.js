@@ -4,7 +4,7 @@ import SiteFilter from './components/SiteFilter';
 import { generateSiteFiltersData } from './mock/generateSiteFiltersData';
 import { generateTasksData } from './mock/generateTasksData';
 import { render } from './utils/render';
-import TasksModel from './models/tasks';
+import Tasks from './models/tasks';
 import BoardController from './controllers/board';
 import Board from './components/Board';
 
@@ -12,7 +12,9 @@ import Board from './components/Board';
 const TASK_COUNT = 10;
 
 const tasksData = generateTasksData(TASK_COUNT);
-const tasksModel = new TasksModel().setTasksData(tasksData);
+const tasksModel = new Tasks();
+tasksModel.setTasksData(tasksData);
+
 const filtersData = generateSiteFiltersData(tasksData);
 
 const siteMainElement = document.querySelector('.main');

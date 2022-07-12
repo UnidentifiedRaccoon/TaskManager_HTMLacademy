@@ -31,4 +31,8 @@ export default class SiteFilter extends IComponent {
   getTemplate() {
     return createSiteFilterTemplate(this.filters);
   }
+
+  setFilterChangeHandler(handler) {
+
+  }
 }

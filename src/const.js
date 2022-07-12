@@ -23,6 +23,15 @@ export const FILTER_TITLES = [
   'Archive',
 ];
 
+export const FilterType = {
+  ALL: 'all',
+  ARCHIVE: 'archive',
+  FAVORITES: 'favorites',
+  OVERDUE: 'overdue',
+  REPEATING: 'repeating',
+  TODAY: 'today',
+};
+
 export const COLORS = [
   'black',
   'yellow',
