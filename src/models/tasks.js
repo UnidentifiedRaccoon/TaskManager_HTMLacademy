@@ -25,15 +25,22 @@ export default class Tasks {
 
   updateTask(id, updatedTaskData) {
     const index = this._tasks.findIndex((task) => task.id === id);
-    if (index === -1) return false;
+    if (index === -1) return -1;
 
-    this._tasks = [this._tasks.slice(0, index), updatedTaskData, this._tasks.slice(index + 1)];
+    this._tasks = [
+      ...this._tasks.slice(0, index),
+      updatedTaskData,
+      ...this._tasks.slice(index + 1)];
     this._callHandlers(this._dataChangeHandlers);
-    return true;
+    return index;
   }
 
   setDataChangeHandler(handler) {
     this._dataChangeHandlers.push(handler);
+  }
+
+  setFilterChangeHandler(handler) {
+    this._filterChangeHandlers.push(handler);
   }
 
   // eslint-disable-next-line class-methods-use-this

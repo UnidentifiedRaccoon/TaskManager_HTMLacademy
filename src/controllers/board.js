@@ -64,7 +64,10 @@ export default class BoardController {
     this._loadMoreHandler = this._loadMoreHandler.bind(this);
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
+    this._onFilterChange = this._onFilterChange.bind(this);
+
     this._sortComponent.setSortTypeChangeHandler(this._sortTypeChangeHandler);
+    this._tasksModel.setFilterChangeHandler(this._onFilterChange);
   }
 
   render() {
@@ -78,6 +81,31 @@ export default class BoardController {
     render(this._container.getElement(), this._sortComponent);
     render(this._container.getElement(), this._tasksListComponent);
     this._renderTaskControllers(0, this._showingTaskCount);
+    this._renderLoadMoreButton();
+  }
+
+  _renderTaskControllers(from, to) {
+    const sortedTasksData = getSortTasksData(
+      this._tasksModel.getTasksData(),
+      this._sortComponent.getSortType(),
+    );
+    const newRenderedControllers = renderTasks(
+      this._tasksListComponent,
+      sortedTasksData.slice(from, to),
+      this._onDataChange,
+      this._onViewChange,
+    );
+    this._renderedTaskControllers = this._renderedTaskControllers.concat(newRenderedControllers);
+  }
+
+  _removeTasks() {
+    this._renderedTaskControllers.forEach((taskController) => taskController.destroy());
+    this._renderedTaskControllers = [];
+  }
+
+  _updateTasks(count) {
+    this._removeTasks();
+    this._renderTaskControllers(0, count);
     this._renderLoadMoreButton();
   }
 
@@ -110,20 +138,6 @@ export default class BoardController {
     this._loadMoreButtonComponent.setClickHandler(this._loadMoreHandler);
   }
 
-  _renderTaskControllers(from, to) {
-    const sortedTasksData = getSortTasksData(
-      this._tasksModel.getTasksData(),
-      this._sortComponent.getSortType(),
-    );
-    const newRenderedControllers = renderTasks(
-      this._tasksListComponent,
-      sortedTasksData.slice(from, to),
-      this._onDataChange,
-      this._onViewChange,
-    );
-    this._renderedTaskControllers = this._renderedTaskControllers.concat(newRenderedControllers);
-  }
-
   _onDataChange(oldData, newData) {
     const index = this._tasksModel.updateTask(oldData.id, newData);
     if (index === -1) return;
@@ -134,5 +148,9 @@ export default class BoardController {
 
   _onViewChange() {
     this._renderedTaskControllers.forEach((taskController) => taskController.setDefaultView());
+  }
+
+  _onFilterChange() {
+    this._updateTasks(SHOWING_TASKS_COUNT_ON_START);
   }
 }

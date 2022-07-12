@@ -1,5 +1,5 @@
 import Task from '../components/Task';
-import { render, replace } from '../utils/render';
+import { remove, render, replace } from '../utils/render';
 import TaskEdit from '../components/TaskEdit';
 import { Mode } from '../const';
 
@@ -81,6 +81,12 @@ export default class TaskController {
     this.mode = Mode.DEFAULT;
     this.taskEdit.reset();
     replace(this.taskEdit, this.task);
+    document.removeEventListener('keydown', this._onEscKeyDownHandler);
+  }
+
+  destroy() {
+    remove(this.task);
+    remove(this.taskEdit);
     document.removeEventListener('keydown', this._onEscKeyDownHandler);
   }
 }
