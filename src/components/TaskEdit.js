@@ -131,6 +131,25 @@ const createTaskEditTemplate = (task, options = {}) => {
           </article>
       `;
 };
+
+const parseFormData = (formData) => {
+  const repeatingDays = DAYS.reduce((acc, day) => {
+    acc[day] = false;
+    return acc;
+  }, {});
+  const date = formData.get('date');
+
+  return {
+    description: formData.get('text'),
+    color: formData.get('color'),
+    dueDate: date ? new Date(date) : null,
+    repeatingDays: formData.getAll('repeat').reduce((acc, it) => {
+      acc[it] = true;
+      return acc;
+    }, repeatingDays),
+  };
+};
+
 export default class TaskEdit extends ISmartComponent {
   constructor(task) {
     super();
@@ -142,6 +161,7 @@ export default class TaskEdit extends ISmartComponent {
 
     this._flatpickr = null;
     this._submitHandler = null;
+    this._deleteButtonClickHandler = null;
 
     this._applyFlatpickr();
     this._setAllListeners();
@@ -164,8 +184,18 @@ export default class TaskEdit extends ISmartComponent {
     this._applyFlatpickr();
   }
 
+  removeElement() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    super.removeElement();
+  }
+
   recoveryListeners() {
     this.setSubmitHandler(this._submitHandler);
+    this.setDeleteButtonClickHandler(this._deleteButtonClickHandler);
     this._setAllListeners();
   }
 
@@ -193,6 +223,13 @@ export default class TaskEdit extends ISmartComponent {
     }
   }
 
+  getData() {
+    const form = this.getElement().querySelector('.card__form');
+    const formData = new FormData(form);
+
+    return parseFormData(formData);
+  }
+
   setSubmitHandler(handler) {
     this.getElement()
       .querySelector('form')
@@ -201,6 +238,16 @@ export default class TaskEdit extends ISmartComponent {
         handler();
       });
     this._submitHandler = handler;
+  }
+
+  setDeleteButtonClickHandler(handler) {
+    this.getElement().querySelector('.card__delete')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler();
+      });
+
+    this._deleteButtonClickHandler = handler;
   }
 
   _setAllListeners() {

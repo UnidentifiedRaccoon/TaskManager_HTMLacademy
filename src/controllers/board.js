@@ -11,7 +11,7 @@ const SHOWING_TASKS_COUNT_ON_BUTTON_CLICK = 4;
 
 const renderTask = (container, taskData, onDataChange, onViewChange) => {
   const taskController = new TaskController(container, onDataChange, onViewChange);
-  taskController.render(taskData);
+  taskController.render(taskData, TaskControllerMode.DEFAULT);
   return taskController;
 };
 
@@ -172,7 +172,7 @@ export default class BoardController {
       if (isSucceed) {
         const taskController = this._renderedTaskControllers
           .find((task) => task.taskData.id === newData.id);
-        taskController.render(newData);
+        taskController.render(newData, TaskControllerMode.DEFAULT);
       }
     }
   }
