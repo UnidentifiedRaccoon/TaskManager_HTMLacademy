@@ -1,11 +1,11 @@
-import { formatTime, formatDate } from '../utils/common';
+import { formatTime, formatDate, isOverdueDate } from '../utils/common';
 import IComponent from './AbstractClasses/IComponent';
 
 const createTaskTemplate = (task) => {
   const {
     description, dueDate, color, repeatingDays, isArchive, isFavorite,
   } = task;
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
+  const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isDateShowing = !!dueDate;
   const date = isDateShowing ? formatDate(dueDate) : '';
   const time = isDateShowing ? formatTime(dueDate) : '';

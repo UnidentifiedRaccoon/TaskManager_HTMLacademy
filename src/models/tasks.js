@@ -25,14 +25,14 @@ export default class Tasks {
 
   updateTask(id, updatedTaskData) {
     const index = this._tasks.findIndex((task) => task.id === id);
-    if (index === -1) return -1;
+    if (index === -1) return false;
 
     this._tasks = [
       ...this._tasks.slice(0, index),
       updatedTaskData,
       ...this._tasks.slice(index + 1)];
     this._callHandlers(this._dataChangeHandlers);
-    return index;
+    return true;
   }
 
   setDataChangeHandler(handler) {

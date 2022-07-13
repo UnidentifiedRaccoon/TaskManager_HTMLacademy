@@ -1,6 +1,8 @@
 import flatpickr from 'flatpickr';
 import { COLORS, DAYS } from '../const';
-import { formatTime, formatDate } from '../utils/common';
+import {
+  formatTime, formatDate, isRepeating, isOverdueDate,
+} from '../utils/common';
 import ISmartComponent from './AbstractClasses/ISmartComponent';
 
 import 'flatpickr/dist/flatpickr.min.css';
@@ -20,22 +22,26 @@ const createColorsMarkup = (colors, currentColor) => colors.map((color, index) =
         >${color}</label
       >
 `).join('\n');
-const createRepeatingDaysMarkup = (days, repeatingDays, isRepeating) => days.map((day, index) => {
-  const isCurrentDayChecked = repeatingDays[day];
-  return `
-      <input
-        class="visually-hidden card__repeat-day-input"
-        type="checkbox"
-        id="repeat-${day}-${index}"
-        name="repeat"
-        value="${day}"
-        ${isRepeating && isCurrentDayChecked ? 'checked' : ''}
-        ${isRepeating ? '' : 'disabled'}
-      />
-      <label class="card__repeat-day" for="repeat-${day}-${index}"
-        >${day}</label
-      >`;
-}).join('\n');
+
+const createRepeatingDaysMarkup = (days, repeatingDays) => days
+  .map((day, index) => {
+    const isChecked = repeatingDays[day];
+    return (
+      `<input
+          class="visually-hidden card__repeat-day-input"
+          class="visually-hidden card__repeat-day-input"
+          type="checkbox"
+          id="repeat-${day}-${index}"
+          name="repeat"
+          value="${day}"
+          ${isChecked ? 'checked' : ''}
+        />
+        <label class="card__repeat-day" for="repeat-${day}-${index}"
+          >${day}</label
+        >`
+    );
+  })
+  .join('\n');
 
 const createTaskEditTemplate = (task, options = {}) => {
   const { description, dueDate } = task;
@@ -44,9 +50,10 @@ const createTaskEditTemplate = (task, options = {}) => {
     isDateShowing, isRepeatingTask, activeRepeatingDays, currentColor,
   } = options;
 
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
+  const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask)
-      || (isRepeatingTask && !Object.values(activeRepeatingDays).some(Boolean));
+      || (isRepeatingTask && isRepeating(activeRepeatingDays));
+
   const date = (isDateShowing && dueDate) ? formatDate(dueDate) : '';
   const time = (isDateShowing && dueDate) ? formatTime(dueDate) : '';
 
@@ -54,7 +61,7 @@ const createTaskEditTemplate = (task, options = {}) => {
   const deadlineClass = isExpired ? 'card--deadline' : '';
 
   const colorsMarkup = createColorsMarkup(COLORS, currentColor);
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays, isRepeatingTask);
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
 
   return `
           <article class="card card--edit card--${currentColor} ${repeatClass} ${deadlineClass}">
