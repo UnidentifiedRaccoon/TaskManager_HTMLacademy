@@ -19,6 +19,14 @@ export default class FilterController {
     this._tasksModel.setFilterChangeHandler(this._onFilterChangeInModel);
   }
 
+  hide() {
+    this._filterComponent.hide();
+  }
+
+  show() {
+    this._filterComponent.show();
+  }
+
   render() {
     const container = this._container;
     const allTasks = this._tasksModel.getAllTasksData();

@@ -1,4 +1,4 @@
-import Chart from 'chart.js';
+import { Chart } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import moment from 'moment';
 import flatpickr from 'flatpickr';
@@ -17,6 +17,7 @@ const getUniqItems = (item, index, array) => array.indexOf(item) === index;
 
 const getTasksByDateRange = (tasks, dateFrom, dateTo) => tasks.filter((task) => {
   const { dueDate } = task;
+  console.log(dueDate);
 
   return dueDate >= dateFrom && dueDate <= dateTo;
 });
@@ -232,7 +233,8 @@ export default class Statistics extends ISmartComponent {
     this.rerender(this._tasks, this._dateFrom, this._dateTo);
   }
 
-  // recoveryListeners() {}
+  // eslint-disable-next-line class-methods-use-this
+  recoveryListeners() {}
 
   rerender(tasks, dateFrom, dateTo) {
     this._tasks = tasks;
