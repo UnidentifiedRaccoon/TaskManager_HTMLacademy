@@ -58,14 +58,14 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => days
 const createTaskEditTemplate = (task, options = {}) => {
   const { dueDate } = task;
   const {
-    isDateShowing, isRepeatingTask, activeRepeatingDays, description, currentColor,
+    isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription, currentColor,
   } = options;
-  const currentDescription = encode(description);
+  const encodedDescription = encode(currentDescription);
 
   const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask)
       || (isRepeatingTask && !isRepeating(activeRepeatingDays))
-      || !isAllowableDescriptionLength(currentDescription);
+      || !isAllowableDescriptionLength(encodedDescription);
 
   const date = (isDateShowing && dueDate) ? formatDate(dueDate) : '';
   const time = (isDateShowing && dueDate) ? formatTime(dueDate) : '';
@@ -92,7 +92,7 @@ const createTaskEditTemplate = (task, options = {}) => {
                       class="card__text"
                       placeholder="Start typing your text here..."
                       name="text"
-                    >${currentDescription}</textarea>
+                    >${encodedDescription}</textarea>
                   </label>
                 </div>
 

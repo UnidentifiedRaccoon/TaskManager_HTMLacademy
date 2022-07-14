@@ -7,7 +7,7 @@ const createTaskTemplate = (task) => {
   const {
     description, dueDate, color, repeatingDays, isArchive, isFavorite,
   } = task;
-  const currentDescription = encode(description);
+  const encodedDescription = encode(description);
   const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isDateShowing = !!dueDate;
   const date = isDateShowing ? formatDate(dueDate) : '';
@@ -44,7 +44,7 @@ const createTaskTemplate = (task) => {
           </div>
 
           <div class="card__textarea-wrap">
-            <p class="card__text">${currentDescription}</p>
+            <p class="card__text">${encodedDescription}</p>
           </div>
 
           <div class="card__settings">
