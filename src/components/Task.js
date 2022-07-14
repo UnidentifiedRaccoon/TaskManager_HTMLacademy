@@ -1,3 +1,5 @@
+import { encode } from 'he';
+
 import { formatTime, formatDate, isOverdueDate } from '../utils/common';
 import IComponent from './AbstractClasses/IComponent';
 
@@ -5,6 +7,7 @@ const createTaskTemplate = (task) => {
   const {
     description, dueDate, color, repeatingDays, isArchive, isFavorite,
   } = task;
+  const currentDescription = encode(description);
   const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isDateShowing = !!dueDate;
   const date = isDateShowing ? formatDate(dueDate) : '';
@@ -41,7 +44,7 @@ const createTaskTemplate = (task) => {
           </div>
 
           <div class="card__textarea-wrap">
-            <p class="card__text">${description}</p>
+            <p class="card__text">${currentDescription}</p>
           </div>
 
           <div class="card__settings">

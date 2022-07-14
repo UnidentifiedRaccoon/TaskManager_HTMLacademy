@@ -1,4 +1,6 @@
 import flatpickr from 'flatpickr';
+import { encode } from 'he';
+
 import { COLORS, DAYS } from '../const';
 import {
   formatTime, formatDate, isRepeating, isOverdueDate,
@@ -56,8 +58,9 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => days
 const createTaskEditTemplate = (task, options = {}) => {
   const { dueDate } = task;
   const {
-    isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription, currentColor,
+    isDateShowing, isRepeatingTask, activeRepeatingDays, description, currentColor,
   } = options;
+  const currentDescription = encode(description);
 
   const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask)
