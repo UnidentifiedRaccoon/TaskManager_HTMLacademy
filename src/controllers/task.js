@@ -1,13 +1,31 @@
 import Task from '../components/Task';
 import { remove, render, replace } from '../utils/render';
 import TaskEdit from '../components/TaskEdit';
+import { COLOR, RenderMethods } from '../const';
 
 export const Mode = {
   DEFAULT: 'default',
   EDIT: 'edit',
+  ADDING: 'adding',
 };
 
-export const EmptyTask = {};
+export const EmptyTask = {
+  description: '',
+  dueDate: null,
+  repeatingDays: {
+    mo: false,
+    tu: false,
+    we: false,
+    th: false,
+    fr: false,
+    sa: false,
+    su: false,
+  },
+  color: COLOR.BLACK,
+  isFavorite: false,
+  isArchive: false,
+};
+
 export default class TaskController {
   constructor(container, onDataChange, onViewChange) {
     this.container = container;
@@ -35,12 +53,25 @@ export default class TaskController {
     this.task = new Task(taskData);
     this.taskEdit = new TaskEdit(taskData);
 
-    if (oldTask && oldTaskEdit) {
-      replace(oldTask, this.task);
-      replace(oldTaskEdit, this.taskEdit);
-      this._replaceEditToTask();
-    } else {
-      render(this.container.getElement(), this.task);
+    switch (mode) {
+      case Mode.DEFAULT:
+        if (oldTask && oldTaskEdit) {
+          replace(oldTask, this.task);
+          replace(oldTaskEdit, this.taskEdit);
+          this._replaceEditToTask();
+        } else {
+          render(this.container.getElement(), this.task);
+        }
+        break;
+      case Mode.ADDING:
+        if (oldTask && oldTaskEdit) {
+          remove(oldTask);
+          remove(oldTaskEdit);
+        }
+        document.addEventListener('keydown', this._onEscKeyDownHandler);
+        render(this.container, this.taskEdit, RenderMethods.PREPEND);
+        break;
+      default:
     }
 
     this.task.setEditBtnClickHandler(this.onEditBtnClickHandler);
@@ -55,13 +86,13 @@ export default class TaskController {
   }
 
   _onSubmitHandler() {
-    this._replaceEditToTask();
     const data = this.taskEdit.getData();
-    this._onDataChange(this.task, data);
+    this._onDataChange(this.taskData, data);
+    this._replaceEditToTask();
   }
 
   _onDeleteHandler() {
-    this._onDataChange(this, this.task, null);
+    this._onDataChange(this.taskData, null);
   }
 
   _onEditBtnClickHandler() {
@@ -79,6 +110,9 @@ export default class TaskController {
   _onEscKeyDownHandler(event) {
     const isEsc = event.keyCode === 27;
     if (isEsc) {
+      if (this.mode === Mode.ADDING) {
+        this._onDataChange(EmptyTask, null);
+      }
       this._replaceEditToTask();
     }
   }

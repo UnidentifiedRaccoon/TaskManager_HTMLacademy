@@ -1,5 +1,11 @@
 import IComponent from './AbstractClasses/IComponent';
 
+export const MenuItem = {
+  NEW_TASK: 'control__new-task',
+  STATISTICS: 'control__statistic',
+  TASKS: 'control__task',
+};
+
 const createSiteMenuTemplate = () => `<section class="control__btn-wrap">
           <input 
           type="radio"
@@ -33,5 +39,24 @@ export default class SiteMenu extends IComponent {
   // eslint-disable-next-line class-methods-use-this
   getTemplate() {
     return createSiteMenuTemplate();
+  }
+
+  setActiveItem(menuItem) {
+    const item = this.getElement().querySelector(`#${menuItem}`);
+    if (item) {
+      item.checked = true;
+    }
+  }
+
+  setOnChange(handler) {
+    this.getElement().addEventListener('change', (evt) => {
+      if (evt.target.tagName !== 'INPUT') {
+        return;
+      }
+
+      const menuItem = evt.target.id;
+
+      handler(menuItem);
+    });
   }
 }

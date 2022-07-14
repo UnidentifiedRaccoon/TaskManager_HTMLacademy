@@ -24,8 +24,6 @@ export const getTasksInOneDay = (tasks, date) => tasks
 
 export const getTasksByFilter = (tasks, filterType) => {
   const nowDate = new Date();
-  console.log(tasks);
-
   switch (filterType) {
     case FilterType.ALL:
       return getNotArchiveTasks(tasks);

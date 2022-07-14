@@ -7,6 +7,16 @@ import ISmartComponent from './AbstractClasses/ISmartComponent';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
+const MIN_DESCRIPTION_LENGTH = 1;
+const MAX_DESCRIPTION_LENGTH = 140;
+
+const isAllowableDescriptionLength = (description) => {
+  const { length } = description;
+
+  return length >= MIN_DESCRIPTION_LENGTH
+      && length <= MAX_DESCRIPTION_LENGTH;
+};
+
 const createColorsMarkup = (colors, currentColor) => colors.map((color, index) => `
       <input
         type="radio"
@@ -44,15 +54,15 @@ const createRepeatingDaysMarkup = (days, repeatingDays) => days
   .join('\n');
 
 const createTaskEditTemplate = (task, options = {}) => {
-  const { description, dueDate } = task;
-
+  const { dueDate } = task;
   const {
-    isDateShowing, isRepeatingTask, activeRepeatingDays, currentColor,
+    isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription, currentColor,
   } = options;
 
   const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask)
-      || (isRepeatingTask && isRepeating(activeRepeatingDays));
+      || (isRepeatingTask && !isRepeating(activeRepeatingDays))
+      || !isAllowableDescriptionLength(currentDescription);
 
   const date = (isDateShowing && dueDate) ? formatDate(dueDate) : '';
   const time = (isDateShowing && dueDate) ? formatTime(dueDate) : '';
@@ -79,7 +89,7 @@ const createTaskEditTemplate = (task, options = {}) => {
                       class="card__text"
                       placeholder="Start typing your text here..."
                       name="text"
-                    >${description}</textarea>
+                    >${currentDescription}</textarea>
                   </label>
                 </div>
 
@@ -158,6 +168,7 @@ export default class TaskEdit extends ISmartComponent {
     this._isRepeatingTask = Object.values(task.repeatingDays).some(Boolean);
     this._activeRepeatingDays = { ...task.repeatingDays };
     this._currentColor = task.color;
+    this._currentDescription = task.description;
 
     this._flatpickr = null;
     this._submitHandler = null;
@@ -174,6 +185,7 @@ export default class TaskEdit extends ISmartComponent {
         isDateShowing: this._isDateShowing,
         isRepeatingTask: this._isRepeatingTask,
         activeRepeatingDays: this._activeRepeatingDays,
+        currentDescription: this._currentDescription,
         currentColor: this._currentColor,
       },
     );
@@ -204,6 +216,7 @@ export default class TaskEdit extends ISmartComponent {
     this._isRepeatingTask = Object.values(this.task.repeatingDays).some(Boolean);
     this._activeRepeatingDays = { ...this.task.repeatingDays };
     this._currentColor = this.task.color;
+    this._currentDescription = this.task.description;
     this.rerender();
   }
 
@@ -255,6 +268,17 @@ export default class TaskEdit extends ISmartComponent {
     this._addRepeatToggleClickListener();
     this._addRepeatingDaysChangeListener();
     this._addColorsChangeListener();
+    this._addDescriptionsChangeListener();
+  }
+
+  _addDescriptionsChangeListener() {
+    this.getElement().querySelector('.card__text')
+      .addEventListener('input', (evt) => {
+        this._currentDescription = evt.target.value;
+
+        const saveButton = this.getElement().querySelector('.card__save');
+        saveButton.disabled = !isAllowableDescriptionLength(this._currentDescription);
+      });
   }
 
   _addDateToggleClickListener() {
@@ -273,6 +297,12 @@ export default class TaskEdit extends ISmartComponent {
       .addEventListener('click', (event) => {
         event.preventDefault();
         this._isRepeatingTask = !this._isRepeatingTask;
+        if (!this._isRepeatingTask) {
+          this._activeRepeatingDays = DAYS.reduce((acc, day) => {
+            acc[day] = false;
+            return acc;
+          }, {});
+        }
         this.rerender();
       });
   }
@@ -281,8 +311,9 @@ export default class TaskEdit extends ISmartComponent {
     this.getElement()
       .querySelector('.card__repeat-days')
       .addEventListener('change', (event) => {
-        event.preventDefault();
-        this._activeRepeatingDays[event.target.value] = event.target.checked;
+        this._activeRepeatingDays[event.target.value] = this._isRepeatingTask
+          ? event.target.checked
+          : false;
         this.rerender();
       });
   }

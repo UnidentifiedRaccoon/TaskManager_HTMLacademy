@@ -59,6 +59,7 @@ export default class BoardController {
 
     this._tasksListComponent = new TasksList();
     this._loadMoreButtonComponent = new LoadModeButton();
+    this._creatingTask = null;
 
     this._sortTypeChangeHandler = this._sortTypeChangeHandler.bind(this);
     this._loadMoreHandler = this._loadMoreHandler.bind(this);
@@ -97,6 +98,20 @@ export default class BoardController {
     );
     this._renderedTaskControllers = this._renderedTaskControllers.concat(newRenderedControllers);
     this._showingTaskCount = this._renderedTaskControllers.length;
+  }
+
+  createTask() {
+    if (this._creatingTask) {
+      return;
+    }
+
+    const taskListElement = this._tasksListComponent.getElement();
+    this._creatingTask = new TaskController(
+      taskListElement,
+      this._onDataChange,
+      this._onViewChange,
+    );
+    this._creatingTask.render(EmptyTask, TaskControllerMode.ADDING);
   }
 
   _removeTasks() {
@@ -144,9 +159,13 @@ export default class BoardController {
       this._creatingTask = null;
       if (newData === null) {
         // ToDO taskController.destroy();
+        // ToDO this._creatingTask.destroy(); ???
+
         this._updateTasks(this._showingTaskCount);
       } else {
         this._tasksModel.addTask(newData);
+        // ToDO this._creatingTask.render(); ???
+
         const taskController = new TaskController(
           this._container,
           this._onDataChange,
@@ -171,7 +190,7 @@ export default class BoardController {
       const isSucceed = this._tasksModel.updateTask(oldData.id, newData);
       if (isSucceed) {
         const taskController = this._renderedTaskControllers
-          .find((task) => task.taskData.id === newData.id);
+          .find((task) => task.taskData.id === oldData.id);
         taskController.render(newData, TaskControllerMode.DEFAULT);
       }
     }
