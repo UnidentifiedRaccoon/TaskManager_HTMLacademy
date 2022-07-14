@@ -71,6 +71,14 @@ export default class BoardController {
     this._tasksModel.setFilterChangeHandler(this._onFilterChange);
   }
 
+  hide() {
+    this._container.hide();
+  }
+
+  show() {
+    this._container.show();
+  }
+
   render() {
     const isAllTasksArchived = this._tasksModel.getTasksData().every((task) => task.isArchive);
     const isNoTasks = this._tasksModel.getTasksData().length === 0;
