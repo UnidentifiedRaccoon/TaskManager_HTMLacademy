@@ -73,6 +73,13 @@ export default class Task extends IComponent {
     return createTaskTemplate(this.task);
   }
 
+  getData() {
+    return {
+      isArchive: this.isArchive,
+      isFavorite: this.isFavorite,
+    };
+  }
+
   setEditBtnClickHandler(handler) {
     this.getElement()
       .querySelector('.card__btn--edit')

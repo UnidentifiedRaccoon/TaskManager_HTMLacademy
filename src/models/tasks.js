@@ -5,6 +5,7 @@ export default class Tasks {
   constructor() {
     this._tasks = [];
     this._activeFilterType = FilterType.All;
+    this._isTaskCreatingRun = false;
 
     this._dataChangeHandlers = [];
     this._filterChangeHandlers = [];
@@ -23,8 +24,16 @@ export default class Tasks {
     this._callHandlers(this._dataChangeHandlers);
   }
 
+  getIsTaskCreatingRun() {
+    return this._isTaskCreatingRun;
+  }
+
+  setIsTaskCreatingRun(isCreating) {
+    this._isTaskCreatingRun = isCreating;
+  }
+
   addTask(task) {
-    this._tasks = [...task, this._tasks];
+    this._tasks = [task, ...this._tasks];
     this._callHandlers(this._dataChangeHandlers);
   }
 
@@ -67,5 +76,9 @@ export default class Tasks {
   setFilter(filterType) {
     this._activeFilterType = filterType;
     this._callHandlers(this._filterChangeHandlers);
+  }
+
+  getActiveFilter() {
+    return this._activeFilterType;
   }
 }

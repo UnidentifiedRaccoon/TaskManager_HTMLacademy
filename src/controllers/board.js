@@ -3,7 +3,7 @@ import NoTasks from '../components/NoTasks';
 import Sort from '../components/Sort';
 import TasksList from '../components/TasksList';
 import LoadModeButton from '../components/LoadModeButton';
-import { SortTypes } from '../const';
+import { FilterType, SortTypes } from '../const';
 import TaskController, { EmptyTask, Mode as TaskControllerMode } from './task';
 
 const SHOWING_TASKS_COUNT_ON_START = 4;
@@ -101,6 +101,8 @@ export default class BoardController {
   }
 
   createTask() {
+    this._tasksModel.setFilter(FilterType.ALL);
+    this._tasksModel.setIsTaskCreatingRun(true);
     if (this._creatingTask) {
       return;
     }
@@ -155,34 +157,27 @@ export default class BoardController {
   }
 
   _onDataChange(oldData, newData) {
+    this._tasksModel.setIsTaskCreatingRun(false);
     if (oldData === EmptyTask) {
-      this._creatingTask = null;
       if (newData === null) {
-        // ToDO taskController.destroy();
-        // ToDO this._creatingTask.destroy(); ???
+        this._creatingTask.destroy();
 
         this._updateTasks(this._showingTaskCount);
       } else {
         this._tasksModel.addTask(newData);
-        // ToDO this._creatingTask.render(); ???
-
-        const taskController = new TaskController(
-          this._container,
-          this._onDataChange,
-          this._onViewChange,
-        );
-        taskController.render(newData, TaskControllerMode.DEFAULT);
+        this._creatingTask.render(newData, TaskControllerMode.DEFAULT);
 
         if (this._showingTaskCount % SHOWING_TASKS_COUNT_ON_BUTTON_CLICK === 0) {
           const destroyedTask = this._renderedTaskControllers.pop();
           destroyedTask.destroy();
         }
 
-        this._renderedTaskControllers = [taskController, ...this._renderedTaskControllers];
+        this._renderedTaskControllers = [this._creatingTask, ...this._renderedTaskControllers];
         this._showingTaskCount = this._renderedTaskControllers.length;
 
         this._renderLoadMoreButton();
       }
+      this._creatingTask = null;
     } else if (newData === null) {
       this._tasksModel.removeTask(oldData.id);
       this._updateTasks(this._showingTaskCount);

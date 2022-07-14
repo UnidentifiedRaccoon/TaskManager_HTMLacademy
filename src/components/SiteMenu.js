@@ -53,7 +53,6 @@ export default class SiteMenu extends IComponent {
       if (evt.target.tagName !== 'INPUT') {
         return;
       }
-
       const menuItem = evt.target.id;
 
       handler(menuItem);

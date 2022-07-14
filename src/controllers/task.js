@@ -34,7 +34,7 @@ export default class TaskController {
     this.taskData = null;
     this.task = null;
     this.taskEdit = null;
-    this.mode = Mode.DEFAULT;
+    this._mode = Mode.DEFAULT;
 
     this.onEditBtnClickHandler = this._onEditBtnClickHandler.bind(this);
     this.onArchiveBtnClickHandler = this._onArchiveBtnClickHandler.bind(this);
@@ -82,12 +82,13 @@ export default class TaskController {
   }
 
   setDefaultView() {
-    if (this.mode !== Mode.DEFAULT) this._replaceEditToTask();
+    if (this._mode !== Mode.DEFAULT) this._replaceEditToTask();
   }
 
   _onSubmitHandler() {
-    const data = this.taskEdit.getData();
-    this._onDataChange(this.taskData, data);
+    const taskEditData = this.taskEdit.getData();
+    const taskData = this.task.getData();
+    this._onDataChange(this.taskData, { ...taskEditData, ...taskData });
     this._replaceEditToTask();
   }
 
@@ -110,8 +111,8 @@ export default class TaskController {
   _onEscKeyDownHandler(event) {
     const isEsc = event.keyCode === 27;
     if (isEsc) {
-      if (this.mode === Mode.ADDING) {
-        this._onDataChange(EmptyTask, null);
+      if (this._mode === Mode.ADDING) {
+        this._onDataChange(this.taskData, null);
       }
       this._replaceEditToTask();
     }
@@ -119,13 +120,13 @@ export default class TaskController {
 
   _replaceTaskToEdit() {
     this._onViewChange();
-    this.mode = Mode.EDIT;
+    this._mode = Mode.EDIT;
     replace(this.task, this.taskEdit);
     document.addEventListener('keydown', this._onEscKeyDownHandler);
   }
 
   _replaceEditToTask() {
-    this.mode = Mode.DEFAULT;
+    this._mode = Mode.DEFAULT;
     this.taskEdit.reset();
     if (document.contains(this.taskEdit.getElement())) {
       replace(this.taskEdit, this.task);

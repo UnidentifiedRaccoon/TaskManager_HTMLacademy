@@ -38,6 +38,7 @@ export default class SiteFilter extends IComponent {
 
   setFilterChangeHandler(handler) {
     this.getElement().addEventListener('change', (evt) => {
+      evt.preventDefault();
       const filterName = getFilterNameById(evt.target.id);
       handler(filterName);
     });
