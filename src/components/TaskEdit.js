@@ -1,9 +1,23 @@
 import flatpickr from 'flatpickr';
+import { encode } from 'he';
+
 import { COLORS, DAYS } from '../const';
-import { formatTime, formatDate } from '../utils/common';
+import {
+  formatTime, formatDate, isRepeating, isOverdueDate,
+} from '../utils/common';
 import ISmartComponent from './AbstractClasses/ISmartComponent';
 
 import 'flatpickr/dist/flatpickr.min.css';
+
+const MIN_DESCRIPTION_LENGTH = 1;
+const MAX_DESCRIPTION_LENGTH = 140;
+
+const isAllowableDescriptionLength = (description) => {
+  const { length } = description;
+
+  return length >= MIN_DESCRIPTION_LENGTH
+      && length <= MAX_DESCRIPTION_LENGTH;
+};
 
 const createColorsMarkup = (colors, currentColor) => colors.map((color, index) => `
       <input
@@ -20,33 +34,39 @@ const createColorsMarkup = (colors, currentColor) => colors.map((color, index) =
         >${color}</label
       >
 `).join('\n');
-const createRepeatingDaysMarkup = (days, repeatingDays, isRepeating) => days.map((day, index) => {
-  const isCurrentDayChecked = repeatingDays[day];
-  return `
-      <input
-        class="visually-hidden card__repeat-day-input"
-        type="checkbox"
-        id="repeat-${day}-${index}"
-        name="repeat"
-        value="${day}"
-        ${isRepeating && isCurrentDayChecked ? 'checked' : ''}
-        ${isRepeating ? '' : 'disabled'}
-      />
-      <label class="card__repeat-day" for="repeat-${day}-${index}"
-        >${day}</label
-      >`;
-}).join('\n');
+
+const createRepeatingDaysMarkup = (days, repeatingDays) => days
+  .map((day, index) => {
+    const isChecked = repeatingDays[day];
+    return (
+      `<input
+          class="visually-hidden card__repeat-day-input"
+          class="visually-hidden card__repeat-day-input"
+          type="checkbox"
+          id="repeat-${day}-${index}"
+          name="repeat"
+          value="${day}"
+          ${isChecked ? 'checked' : ''}
+        />
+        <label class="card__repeat-day" for="repeat-${day}-${index}"
+          >${day}</label
+        >`
+    );
+  })
+  .join('\n');
 
 const createTaskEditTemplate = (task, options = {}) => {
-  const { description, dueDate } = task;
-
+  const { dueDate } = task;
   const {
-    isDateShowing, isRepeatingTask, activeRepeatingDays, currentColor,
+    isDateShowing, isRepeatingTask, activeRepeatingDays, currentDescription, currentColor,
   } = options;
+  const encodedDescription = encode(currentDescription);
 
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
+  const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isSaveButtonBlocked = (isDateShowing && isRepeatingTask)
-      || (isRepeatingTask && !Object.values(activeRepeatingDays).some(Boolean));
+      || (isRepeatingTask && !isRepeating(activeRepeatingDays))
+      || !isAllowableDescriptionLength(encodedDescription);
+
   const date = (isDateShowing && dueDate) ? formatDate(dueDate) : '';
   const time = (isDateShowing && dueDate) ? formatTime(dueDate) : '';
 
@@ -54,7 +74,7 @@ const createTaskEditTemplate = (task, options = {}) => {
   const deadlineClass = isExpired ? 'card--deadline' : '';
 
   const colorsMarkup = createColorsMarkup(COLORS, currentColor);
-  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays, isRepeatingTask);
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
 
   return `
           <article class="card card--edit card--${currentColor} ${repeatClass} ${deadlineClass}">
@@ -72,7 +92,7 @@ const createTaskEditTemplate = (task, options = {}) => {
                       class="card__text"
                       placeholder="Start typing your text here..."
                       name="text"
-                    >${description}</textarea>
+                    >${encodedDescription}</textarea>
                   </label>
                 </div>
 
@@ -124,6 +144,25 @@ const createTaskEditTemplate = (task, options = {}) => {
           </article>
       `;
 };
+
+const parseFormData = (formData) => {
+  const repeatingDays = DAYS.reduce((acc, day) => {
+    acc[day] = false;
+    return acc;
+  }, {});
+  const date = formData.get('date');
+
+  return {
+    description: formData.get('text'),
+    color: formData.get('color'),
+    dueDate: date ? new Date(date) : null,
+    repeatingDays: formData.getAll('repeat').reduce((acc, it) => {
+      acc[it] = true;
+      return acc;
+    }, repeatingDays),
+  };
+};
+
 export default class TaskEdit extends ISmartComponent {
   constructor(task) {
     super();
@@ -132,9 +171,11 @@ export default class TaskEdit extends ISmartComponent {
     this._isRepeatingTask = Object.values(task.repeatingDays).some(Boolean);
     this._activeRepeatingDays = { ...task.repeatingDays };
     this._currentColor = task.color;
+    this._currentDescription = task.description;
 
     this._flatpickr = null;
     this._submitHandler = null;
+    this._deleteButtonClickHandler = null;
 
     this._applyFlatpickr();
     this._setAllListeners();
@@ -147,6 +188,7 @@ export default class TaskEdit extends ISmartComponent {
         isDateShowing: this._isDateShowing,
         isRepeatingTask: this._isRepeatingTask,
         activeRepeatingDays: this._activeRepeatingDays,
+        currentDescription: this._currentDescription,
         currentColor: this._currentColor,
       },
     );
@@ -157,8 +199,18 @@ export default class TaskEdit extends ISmartComponent {
     this._applyFlatpickr();
   }
 
+  removeElement() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    super.removeElement();
+  }
+
   recoveryListeners() {
     this.setSubmitHandler(this._submitHandler);
+    this.setDeleteButtonClickHandler(this._deleteButtonClickHandler);
     this._setAllListeners();
   }
 
@@ -167,6 +219,7 @@ export default class TaskEdit extends ISmartComponent {
     this._isRepeatingTask = Object.values(this.task.repeatingDays).some(Boolean);
     this._activeRepeatingDays = { ...this.task.repeatingDays };
     this._currentColor = this.task.color;
+    this._currentDescription = this.task.description;
     this.rerender();
   }
 
@@ -186,6 +239,13 @@ export default class TaskEdit extends ISmartComponent {
     }
   }
 
+  getData() {
+    const form = this.getElement().querySelector('.card__form');
+    const formData = new FormData(form);
+
+    return parseFormData(formData);
+  }
+
   setSubmitHandler(handler) {
     this.getElement()
       .querySelector('form')
@@ -196,11 +256,32 @@ export default class TaskEdit extends ISmartComponent {
     this._submitHandler = handler;
   }
 
+  setDeleteButtonClickHandler(handler) {
+    this.getElement().querySelector('.card__delete')
+      .addEventListener('click', (event) => {
+        event.preventDefault();
+        handler();
+      });
+
+    this._deleteButtonClickHandler = handler;
+  }
+
   _setAllListeners() {
     this._addDateToggleClickListener();
     this._addRepeatToggleClickListener();
     this._addRepeatingDaysChangeListener();
     this._addColorsChangeListener();
+    this._addDescriptionsChangeListener();
+  }
+
+  _addDescriptionsChangeListener() {
+    this.getElement().querySelector('.card__text')
+      .addEventListener('input', (evt) => {
+        this._currentDescription = evt.target.value;
+
+        const saveButton = this.getElement().querySelector('.card__save');
+        saveButton.disabled = !isAllowableDescriptionLength(this._currentDescription);
+      });
   }
 
   _addDateToggleClickListener() {
@@ -219,6 +300,12 @@ export default class TaskEdit extends ISmartComponent {
       .addEventListener('click', (event) => {
         event.preventDefault();
         this._isRepeatingTask = !this._isRepeatingTask;
+        if (!this._isRepeatingTask) {
+          this._activeRepeatingDays = DAYS.reduce((acc, day) => {
+            acc[day] = false;
+            return acc;
+          }, {});
+        }
         this.rerender();
       });
   }
@@ -227,8 +314,9 @@ export default class TaskEdit extends ISmartComponent {
     this.getElement()
       .querySelector('.card__repeat-days')
       .addEventListener('change', (event) => {
-        event.preventDefault();
-        this._activeRepeatingDays[event.target.value] = event.target.checked;
+        this._activeRepeatingDays[event.target.value] = this._isRepeatingTask
+          ? event.target.checked
+          : false;
         this.rerender();
       });
   }

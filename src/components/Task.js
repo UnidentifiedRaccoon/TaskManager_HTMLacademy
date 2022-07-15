@@ -1,11 +1,14 @@
-import { formatTime, formatDate } from '../utils/common';
+import { encode } from 'he';
+
+import { formatTime, formatDate, isOverdueDate } from '../utils/common';
 import IComponent from './AbstractClasses/IComponent';
 
 const createTaskTemplate = (task) => {
   const {
     description, dueDate, color, repeatingDays, isArchive, isFavorite,
   } = task;
-  const isExpired = dueDate instanceof Date && dueDate < Date.now();
+  const encodedDescription = encode(description);
+  const isExpired = dueDate instanceof Date && isOverdueDate(dueDate, new Date());
   const isDateShowing = !!dueDate;
   const date = isDateShowing ? formatDate(dueDate) : '';
   const time = isDateShowing ? formatTime(dueDate) : '';
@@ -41,7 +44,7 @@ const createTaskTemplate = (task) => {
           </div>
 
           <div class="card__textarea-wrap">
-            <p class="card__text">${description}</p>
+            <p class="card__text">${encodedDescription}</p>
           </div>
 
           <div class="card__settings">
@@ -71,6 +74,13 @@ export default class Task extends IComponent {
 
   getTemplate() {
     return createTaskTemplate(this.task);
+  }
+
+  getData() {
+    return {
+      isArchive: this.isArchive,
+      isFavorite: this.isFavorite,
+    };
   }
 
   setEditBtnClickHandler(handler) {

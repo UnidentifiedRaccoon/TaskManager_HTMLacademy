@@ -1,5 +1,7 @@
 import { createElement } from '../../utils/render';
 
+const HIDDEN_CLASS = 'visually-hidden';
+
 export default class IComponent {
   constructor() {
     if (new.target === IComponent) {
@@ -21,5 +23,17 @@ export default class IComponent {
 
   removeElement() {
     this._element = null;
+  }
+
+  show() {
+    if (this._element) {
+      this._element.classList.remove(HIDDEN_CLASS);
+    }
+  }
+
+  hide() {
+    if (this._element) {
+      this._element.classList.add(HIDDEN_CLASS);
+    }
   }
 }
