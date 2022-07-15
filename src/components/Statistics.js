@@ -1,9 +1,15 @@
-import { Chart } from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
 import moment from 'moment';
 import flatpickr from 'flatpickr';
-import { isOneDay } from '../utils/common';
+import 'flatpickr/dist/flatpickr.min.css';
+
+import { Chart, registerables } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import ISmartComponent from './AbstractClasses/ISmartComponent';
+import { isOneDay } from '../utils/common';
+
+Chart.register(...registerables);
+
+Chart.register(...registerables);
 
 const colorToHex = {
   black: '#000000',
@@ -17,7 +23,6 @@ const getUniqItems = (item, index, array) => array.indexOf(item) === index;
 
 const getTasksByDateRange = (tasks, dateFrom, dateTo) => tasks.filter((task) => {
   const { dueDate } = task;
-  console.log(dueDate);
 
   return dueDate >= dateFrom && dueDate <= dateTo;
 });
@@ -43,7 +48,6 @@ const calculateBetweenDates = (from, to) => {
 
   return result;
 };
-
 const renderColorsChart = (colorsCtx, tasks) => {
   const colors = tasks
     .map((task) => task.color)
@@ -118,6 +122,7 @@ const renderDaysChart = (daysCtx, tasks, dateFrom, dateTo) => {
     data: {
       labels: formattedDates,
       datasets: [{
+        label: 'number of task',
         data: taskCountOnDay,
         backgroundColor: 'transparent',
         borderColor: '#000000',
@@ -136,9 +141,10 @@ const renderDaysChart = (daysCtx, tasks, dateFrom, dateTo) => {
           },
           color: '#ffffff',
         },
+        legend: { display: false },
       },
       scales: {
-        yAxes: [{
+        y: {
           ticks: {
             beginAtZero: true,
             display: false,
@@ -147,8 +153,8 @@ const renderDaysChart = (daysCtx, tasks, dateFrom, dateTo) => {
             display: false,
             drawBorder: false,
           },
-        }],
-        xAxes: [{
+        },
+        x: {
           ticks: {
             fontStyle: 'bold',
             fontColor: '#000000',
@@ -157,7 +163,7 @@ const renderDaysChart = (daysCtx, tasks, dateFrom, dateTo) => {
             display: false,
             drawBorder: false,
           },
-        }],
+        },
       },
       legend: {
         display: false,
@@ -206,16 +212,15 @@ const createStatisticsTemplate = ({ tasks, dateFrom, dateTo }) => {
 export default class Statistics extends ISmartComponent {
   constructor({ tasks, dateFrom, dateTo }) {
     super();
-
     this._tasks = tasks;
     this._dateFrom = dateFrom;
     this._dateTo = dateTo;
 
+    this._flatpickr = null;
     this._daysChart = null;
     this._colorsChart = null;
 
-    this._applyFlatpickr(this.getElement().querySelector('.statistic__period-input'));
-
+    this._applyFlatpickr();
     this._renderCharts();
   }
 
@@ -229,7 +234,6 @@ export default class Statistics extends ISmartComponent {
 
   show() {
     super.show();
-
     this.rerender(this._tasks, this._dateFrom, this._dateTo);
   }
 
@@ -240,9 +244,8 @@ export default class Statistics extends ISmartComponent {
     this._tasks = tasks;
     this._dateFrom = dateFrom;
     this._dateTo = dateTo;
-
     super.rerender();
-
+    this._applyFlatpickr();
     this._renderCharts();
   }
 
@@ -254,7 +257,14 @@ export default class Statistics extends ISmartComponent {
     const daysCtx = element.querySelector('.statistic__days');
     const colorsCtx = element.querySelector('.statistic__colors');
 
-    this._resetCharts();
+    if (this._daysChart) {
+      this._daysChart.destroy();
+      this._daysChart = null;
+    }
+    if (this._colorsChart) {
+      this._colorsChart.destroy();
+      this._colorsChart = null;
+    }
 
     this._daysChart = renderDaysChart(
       daysCtx,
@@ -265,31 +275,20 @@ export default class Statistics extends ISmartComponent {
     this._colorsChart = renderColorsChart(colorsCtx, this._tasks.getTasksData());
   }
 
-  _resetCharts() {
-    if (this._daysChart) {
-      this._daysChart.destroy();
-      this._daysChart = null;
-    }
-
-    if (this._colorsChart) {
-      this._colorsChart.destroy();
-      this._colorsChart = null;
-    }
-  }
-
-  _applyFlatpickr(element) {
+  _applyFlatpickr() {
     if (this._flatpickr) {
       this._flatpickr.destroy();
+      this._flatpickr = null;
     }
 
-    this._flatpickr = flatpickr(element, {
+    const dateElement = this.getElement().querySelector('.statistic__period-input');
+    this._flatpickr = flatpickr(dateElement, {
       altInput: true,
-      allowInput: true,
       defaultDate: [this._dateFrom, this._dateTo],
       mode: 'range',
       onChange: (dates) => {
         if (dates.length === 2) {
-          this.rerender(this._tasks, dates[0], dates[1]);
+          setTimeout(() => { this.rerender(this._tasks, dates[0], dates[1]); }, 0);
         }
       },
     });
